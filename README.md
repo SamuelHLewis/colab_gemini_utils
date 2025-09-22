@@ -33,12 +33,11 @@ This will generate a notebook called `codebase.ipynb`, which you can then upload
 ## Usage Tips
 ### Enforcing Coding Standards
 To enforce a set of standards for styling, infrastructure etc, follow this process:
-1. Write your standards into a markdown file. An example file is in `prompts/gemini_colab_prompt.md`
-2. When you launch a new Colab session, create a markdown cell at the top
-3. Copy the contents of that markdown file into it
-4. As your first prompt to Gemini, tell it to read the cell. For example, use the prompt:
+1. When you launch a new Colab session, write your standards into a markdown cell at the top
+    * if you are using `scripts/codebase_to_colab.py`, this will be done for you if you save your prompt to a markdown file and specify it with `--gemini_prompt_path`
+2. As your first prompt to Gemini, tell it to read the cell. For example, use the prompt:
 
         The Gemini System Prompt cell holds the rules that I want you to follow. Confirm that you understand them, and ask about any ambiguous rules.
-5. Check Gemini's response, and clarify any ambiguities that it has highlighted.
+3. Check Gemini's response, and clarify any ambiguities that it has highlighted.
 
 Your standards are now in the context for that coding session. However, this is not a guarantee that they will always be followed, so continue to check Gemini's outputs.
