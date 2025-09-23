@@ -27,6 +27,10 @@ The main disadvantage with using Gemini in Colab is that you have to copy your c
 python ./scripts/codebase_to_colab.py --codebase_path=./demo --output_notebook=codebase.ipynb --gemini_prompt_path=./prompts/example_prompt.md
 ```
 This will generate a notebook called `codebase.ipynb`, which you can then upload to Google Drive and start working in Colab with Gemini.
+**NOTE** if the above command doesn't work, you may have to invoke it with python3 instead:
+```bash
+python ./scripts/codebase_to_colab.py --codebase_path=./demo --output_notebook=codebase.ipynb --gemini_prompt_path=./prompts/example_prompt.md
+```
 
 **NOTE:** this script ignores any files that are in the `colab.ignore` file. If you have secrets, API keys, IP addresses etc that you do not want to copy out of your codebase, add them to `colab.ignore` and they will be skipped.
 
@@ -41,3 +45,9 @@ To enforce a set of standards for styling, infrastructure etc, follow this proce
 3. Check Gemini's response, and clarify any ambiguities that it has highlighted.
 
 Your standards are now in the context for that coding session. However, this is not a guarantee that they will always be followed, so continue to check Gemini's outputs.
+
+### Complex Tasks
+If you ask Gemini to generate a complicated piece of code, it will usually write a plan beforehand and ask you to confirm each step as it writes the corresponding code. This allows you to redirect it to modify its plan, but sometimes it will stall and not continue on to the next step. If this happens, you can usually get it to move on to the next step by saying something like:
+```
+Continue with your plan
+```
