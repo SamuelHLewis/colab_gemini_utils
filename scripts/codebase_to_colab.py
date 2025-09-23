@@ -74,7 +74,7 @@ def create_notebook_from_codebase(codebase_path, output_notebook_path, gemini_pr
                 "cell_type": "markdown",
                 "metadata": {},
                 "source": [
-                    f"## 📁 `{filepath.name}`\n"
+                    f"## 📁 `{filepath}`\n"
                 ]
             }
             
@@ -92,7 +92,7 @@ def create_notebook_from_codebase(codebase_path, output_notebook_path, gemini_pr
             notebook["cells"].append(code_cell)
             
         except Exception as e:
-            print(f"Error processing {filepath.name}: {e}")
+            print(f"Error processing {filepath}: {e}")
             continue
     
     # Save notebook
