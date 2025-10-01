@@ -21,7 +21,7 @@ However, there are some things that CLI code assistants can do but Gemini in Col
 
 ## Codebase Management
 The main disadvantage with using Gemini in Colab is that you have to copy your code into a Colab notebook at the start, and copy it out again at the end. To make this easier, there are helper scripts in this repo that automate this process. you can use .
-### Codebase to Colab
+### Importing Code with `codebase_to_colab.py`
 `scripts/codebase_to_colab.py` copies each file in your codebase to a code cell in a jupyter notebook, and writes the name of each file to a markdown cell above its contents. A demo codebase is supplied in the `demo` folder to demonstrate this. You can run the script on the demo repo as follows:
 ```bash
 python ./scripts/codebase_to_colab.py --codebase_path=./demo --output_notebook=codebase.ipynb --gemini_prompt_path=./prompts/example_prompt.md
@@ -29,10 +29,17 @@ python ./scripts/codebase_to_colab.py --codebase_path=./demo --output_notebook=c
 This will generate a notebook called `codebase.ipynb`, which you can then upload to Google Drive and start working in Colab with Gemini.
 **NOTE** if the above command doesn't work, you may have to invoke it with python3 instead:
 ```bash
-python ./scripts/codebase_to_colab.py --codebase_path=./demo --output_notebook=codebase.ipynb --gemini_prompt_path=./prompts/example_prompt.md
+python3 ./scripts/codebase_to_colab.py --codebase_path=./demo --output_notebook=codebase.ipynb --gemini_prompt_path=./prompts/example_prompt.md
 ```
 
 **NOTE:** this script ignores any files that are in the `colab.ignore` file. If you have secrets, API keys, IP addresses etc that you do not want to copy out of your codebase, add them to `colab.ignore` and they will be skipped.
+
+### Exporting Code with `colab_to_codebase.py`
+`colab_to_codebase.py` reconstructs your codebase from a colab notebook. It does this by extracting the pairs of markdown cell - code cell from your colab notebook, and writing each to a file, where the file name is what was specified in the markdown cell, and the file contents are what was in the corresponding code cell. You can run the script to reconstruct the demo repo as follows:
+```bash
+python ./scripts/colab_to_codebase.py --notebook_path codebase.ipynb
+```
+This will recreate the entire directory from the contents of the colab notebook, asking for confirmation before a pre-existing file is overwritten. Git will pick up any changes, and they can be committed to your repo in the standard way.
 
 ## Usage Tips
 ### Enforcing Coding Standards
