@@ -28,7 +28,12 @@ def main():
     file_code_pairs = extract_file_code_pairs(notebook_contents)
 
     for filepath, code in file_code_pairs:
-        write_file_with_confirmation(filepath, code)
+        # compare contents of file currently on disk with new file contents
+        with open(filepath, 'r') as f:
+            original_contents = f.read()
+            # only trigger rewrite if changes have been made
+            if original_contents != code:
+                write_file_with_confirmation(filepath, code)
 
     print("Code extraction and saving process finished.")
 
