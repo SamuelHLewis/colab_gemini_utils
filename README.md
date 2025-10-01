@@ -18,9 +18,7 @@ However, there are some things that CLI code assistants can do but Gemini in Col
 * No direct reading and editing of files. Instead, code must be copied in and out of a Colab notebook (but see the Workflow Guide for a workaround)
 * No automatic mechanism to set a system prompt (but see Usage Tips for a workaround)
 * No autonomous running of bash commands e.g. launching UIs
-* No imports of screenshots
 * No memory of previous coding sessions
-* No guarantee of edits being applied to an existing chunk of text
 
 ## Workflow Guide
 The main source of friction when using Gemini in Colab is in copying your code into a Colab notebook at the start, and copying it out again at the end. To make this easier, there are helper scripts in this repo that automate this process.
