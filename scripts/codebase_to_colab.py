@@ -14,6 +14,10 @@ def create_notebook_from_codebase(codebase_path, output_notebook_path, gemini_pr
         gemini_prompt_path (str): Path to a markdown file holding the system prompt for gemini
     """
     
+    # remove output notebook if it already exists, to prevent recursive listing of a notebook within the notebook of a codebase
+    output_notebook_path = Path(output_notebook_path)
+    output_notebook_path.unlink(missing_ok=True)
+
     # Initialize notebook structure
     notebook = {
         "cells": [],
