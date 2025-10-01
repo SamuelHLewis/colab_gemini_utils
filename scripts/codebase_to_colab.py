@@ -40,7 +40,10 @@ def create_notebook_from_codebase(codebase_path, output_notebook_path, gemini_pr
     # Get all Python files recursively
     codebase_path = Path(codebase_path)
     # note: files here have paths already
-    codebase_filepaths = [f for f in codebase_path.rglob('*') if f.is_file() and not str(f).startswith('.git')]
+    codebase_filepaths = [f for f in codebase_path.rglob('*')
+                          if f.is_file()
+                          and not str(f).startswith('.git')
+                          and not str(f).startswith('.pytest_cache')]
     # # remove all .git files
     # for i in range(len(codebase_filepaths)):
     #     if str(codebase_filepaths[i]).startswith('.git'):
