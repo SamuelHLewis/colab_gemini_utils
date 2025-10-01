@@ -1,7 +1,7 @@
-import sys
+import os
+import re
+import nbformat
 import json
-import argparse
-import traceback
 from pathlib import Path
 
 def create_notebook_from_codebase(codebase_path, output_notebook_path, gemini_prompt_path):
@@ -40,11 +40,10 @@ def create_notebook_from_codebase(codebase_path, output_notebook_path, gemini_pr
     # Get all Python files recursively
     codebase_path = Path(codebase_path)
     # note: files here have paths already
-    codebase_filepaths = [f for f in codebase_path.rglob('*') if f.is_file() and not str(f).startswith('.git')]
-    # # remove all .git files
-    # for i in range(len(codebase_filepaths)):
-    #     if str(codebase_filepaths[i]).startswith('.git'):
-    #         codebase_filepaths.pop(i)
+    codebase_filepaths = [f for f in codebase_path.rglob('*')
+                          if f.is_file()
+                          and not str(f).startswith('.git')
+                          and not str(f).startswith('.pytest_cache')]
     
     # remove any files that are irrelevant or sensitive
     with open('colab.ignore', 'r') as f:
@@ -113,63 +112,58 @@ def create_notebook_from_codebase(codebase_path, output_notebook_path, gemini_pr
     except Exception as e:
         print(f"❌ Error saving notebook: {e}")
 
-# Invoke with user inputs from CLI
-def main():
-    parser = argparse.ArgumentParser(
-        description="Convert a Python codebase to a Colab notebook"
-    )
-    parser.add_argument(
-        '--codebase_path',
-        dest='codebase_path',
-        help='Path to the codebase directory'
-    )
-    parser.add_argument(
-        '--output_notebook',
-        dest='output_notebook',
-        help='Output notebook filename (e.g., notebook.ipynb)'
-    )
-    parser.add_argument(
-        '--gemini_prompt_path',
-        dest="gemini_prompt_path",
-        required=False,
-        help="Path to a markdown file containing the system prompt for gemini"
-    )
-    args = parser.parse_args()
+def write_file_with_confirmation(filepath, code):
+    if os.path.exists(filepath):
+        # Ask for confirmation before overwriting using command line input
+        response = input(f"File '{filepath}' already exists. Overwrite? (yes/no): ").lower()
+        if response == 'yes':
+            write_file(filepath, code)
+        else:
+            print(f"Skipped writing to '{filepath}'.")
+    else:
+        # If file doesn't exist, just write it
+        write_file(filepath, code)
 
-    # Validate paths
-    codebase_path = Path(args.codebase_path)
-    if not codebase_path.exists():
-        print(f"❌ Error: Codebase path '{codebase_path}' does not exist")
-        return 1
-    if not codebase_path.is_dir():
-        print(f"❌ Error: '{codebase_path}' is not a directory")
-        return 1
-    
-    # Ensure output has .ipynb extension
-    output_path = Path(args.output_notebook)
-    if output_path.suffix.lower() != '.ipynb':
-        output_path = output_path.with_suffix('.ipynb')
-        print(f"📝 Note: Added .ipynb extension. Output will be: {output_path}")
 
-    if args.gemini_prompt_path:
-        gemini_prompt_path = Path(args.gemini_prompt_path)
-        if not codebase_path.exists():
-            print(f"❌ Error: Gemini prompt path '{gemini_prompt_path}' does not exist")
-            return 1
+def write_file(filepath, code):
+    # Create directories if they don't exist
+    directory = os.path.dirname(filepath)
+    if directory and not os.path.exists(directory):
+        os.makedirs(directory)
+
+    # Save the code to the file
+    with open(filepath, 'w') as f:
+        f.write(code)
+    print(f"Successfully wrote to '{filepath}'.")
+
+def extract_file_code_pairs(notebook_contents:nbformat.NotebookNode):
+    """
+    Extracts pairs of filenames and code contents from a notebook
+    Note: it is assumed that the notebook structure alternates between markdown cells with the filename
+    and code cells with the code contained in that file
     
-    try:
-        create_notebook_from_codebase(
-            codebase_path=str(codebase_path),
-            output_notebook_path=str(output_path),
-            gemini_prompt_path=args.gemini_prompt_path
-        )
-    except KeyboardInterrupt:
-        print("\n⚠️ Operation cancelled by user")
-        return 1
-    except Exception as e:
-        print(f"❌ Unexpected error: {e}")
-        traceback.print_exc()
-        return 1
-    
-if __name__ == "__main__":
-    sys.exit(main())
+    Args:
+        notebook_contents: the contents of a notebook, as read in by nbformat.read()
+    """
+    file_code_pairs = []
+    current_filepath = None
+
+    for cell in notebook_contents.cells:
+        if cell.cell_type == 'markdown':
+            # Look for a markdown cell that seems to contain a file path
+            match = re.search(r'##\s*📁\s*(.*)', cell.source)
+            if match:
+                current_filepath = match.group(1).strip()
+                current_filepath = re.sub(r'\`', '', current_filepath)
+            else:
+                current_filepath = None # Reset if the markdown cell doesn't match the pattern
+        elif cell.cell_type == 'code' and current_filepath:
+            # If the previous cell was a file path markdown and this is a code cell
+            file_code_pairs.append((current_filepath, cell.source))
+            current_filepath = None # Reset after pairing
+
+    if not file_code_pairs:
+        print("No file path and code pairs found in the notebook.")
+        sys.exit(0)
+    else:
+        return file_code_pairs
