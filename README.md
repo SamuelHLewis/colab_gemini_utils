@@ -23,6 +23,13 @@ However, there are some things that CLI code assistants can do but Gemini in Col
 ## Workflow Guide
 The main source of friction when using Gemini in Colab is in copying your code into a Colab notebook at the start, and copying it out again at the end. To make this easier, there are helper scripts in this repo that automate this process.
 
+### Installation
+Use poetry to install the requirements for the helper scripts:
+```bash
+poetry install --no-root
+```
+If you don't have poetry already, follow [these instructions](https://python-poetry.org/docs/#installation) to install it.
+
 ### Importing code into Colab with `codebase_to_colab.py`
 `scripts/codebase_to_colab.py` copies each file in your codebase to a code cell in a jupyter notebook, and writes the name of each file to a markdown cell above its contents. A demo codebase is supplied in the `demo` folder to demonstrate this. You can run the script on the demo repo as follows:
 ```bash
