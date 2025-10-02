@@ -2,7 +2,7 @@ import sys
 import argparse
 import traceback
 from pathlib import Path
-from colab_gemini_utils.src.utils import create_notebook_from_codebase
+from utils import create_notebook_from_codebase
 
 # Invoke with user inputs from CLI
 def main():

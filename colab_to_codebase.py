@@ -1,7 +1,7 @@
 import json # Import the json module
 import sys
 import argparse
-from colab_gemini_utils.src.utils import extract_file_code_pairs, write_file_with_confirmation
+from utils import extract_file_code_pairs, write_file_with_confirmation
 
 def main():
     parser = argparse.ArgumentParser(
