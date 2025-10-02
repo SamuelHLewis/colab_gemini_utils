@@ -25,22 +25,33 @@ However, there are some things that CLI code assistants can do but Gemini in Col
 ## Workflow Guide
 The main source of friction when using Gemini in Colab is in copying your code into a Colab notebook at the start, and copying it out again at the end. To make this easier, there are helper scripts in this repo that automate this process.
 
-### Installation
-Use poetry to install the requirements for the helper scripts:
+### Setup
+The helper scripts use modules that come with a standard python install, so this repo can run in any python environment. To download the helper scripts, run:
 ```bash
-poetry install --no-root
+git clone https://github.com/SamuelHLewis/colab_gemini_utils
 ```
-If you don't have poetry already, follow [these instructions](https://python-poetry.org/docs/#installation) to install it.
+And then move into the repo directory with:
+```bash
+cd colab_gemini_utils
+```
 
 ### Importing code into Colab with `codebase_to_colab.py`
-`scripts/codebase_to_colab.py` copies each file in your codebase to a code cell in a jupyter notebook, and writes the name of each file to a markdown cell above its contents. A demo codebase is supplied in the `demo` folder to demonstrate this. You can run the script on the demo repo as follows:
+`codebase_to_colab.py` copies each file in your codebase to a code cell in a jupyter notebook, and writes the name of each file to a markdown cell above its contents. It has the following arguments:
+
+`--codebase_path`: Path to the codebase directory
+
+`--output_notebook`: Output notebook filename (e.g. `notebook.ipynb`)
+
+`--gemini_prompt_path`: Path to a markdown file containing the system prompt for gemini
+
+A demo codebase is supplied in the `demo` folder to demonstrate this. You can run the script on the demo repo as follows:
 ```bash
-python ./scripts/codebase_to_colab.py --codebase_path=./demo --output_notebook=codebase.ipynb --gemini_prompt_path=./prompts/example_prompt.md
+python codebase_to_colab.py --codebase_path=./demo --output_notebook=codebase.ipynb --gemini_prompt_path=./prompts/example_prompt.md
 ```
 This will generate a notebook called `codebase.ipynb`, which you can then upload to Google Drive and start working in Colab with Gemini.
 **NOTE** if the above command doesn't work, you may have to invoke it with python3 instead:
 ```bash
-python3 ./scripts/codebase_to_colab.py --codebase_path=./demo --output_notebook=codebase.ipynb --gemini_prompt_path=./prompts/example_prompt.md
+python3 codebase_to_colab.py --codebase_path=./demo --output_notebook=codebase.ipynb --gemini_prompt_path=./prompts/example_prompt.md
 ```
 
 **NOTE:** this script ignores any files that are in the `colab.ignore` file. If you have secrets, API keys, IP addresses etc that you do not want to copy out of your codebase, add them to `colab.ignore` and they will be skipped.
