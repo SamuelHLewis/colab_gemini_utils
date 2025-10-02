@@ -3,7 +3,7 @@
 ## Introduction
 This is a guide for working in Google Colab with Gemini. It contains some usage recommendations and workflow guides, and some helper scripts to make switching between a codebase and a colab notebook less painful.
 
-**NOTE:** If you are intending to use this approach to develop code that is not publicly accessible, you should use Gemini through an account that is approved for that task, *not* your personal account.
+**NOTE:** You should use Gemini and Google Colab through a Google account that is suitable for the task at hand. Don't use your personal account for work projects, and don't use your work account for personal projects.
 
 ### Gemini in Colab vs Code Assistant CLIs
 
