@@ -2,7 +2,7 @@ import sys
 import argparse
 import traceback
 from pathlib import Path
-from src.utils import create_notebook_from_codebase
+from utils import create_notebook_from_codebase
 
 # Invoke with user inputs from CLI
 def main():
@@ -35,7 +35,7 @@ def main():
     if not codebase_path.is_dir():
         print(f"❌ Error: '{codebase_path}' is not a directory")
         return 1
-    
+
     # Ensure output has .ipynb extension
     output_path = Path(args.output_notebook)
     if output_path.suffix.lower() != '.ipynb':
@@ -47,7 +47,7 @@ def main():
         if not codebase_path.exists():
             print(f"❌ Error: Gemini prompt path '{gemini_prompt_path}' does not exist")
             return 1
-    
+
     try:
         create_notebook_from_codebase(
             codebase_path=str(codebase_path),
@@ -61,6 +61,6 @@ def main():
         print(f"❌ Unexpected error: {e}")
         traceback.print_exc()
         return 1
-    
+
 if __name__ == "__main__":
     sys.exit(main())
