@@ -1,7 +1,7 @@
-import nbformat
+import json # Import the json module
 import sys
 import argparse
-from src.utils import extract_file_code_pairs, write_file_with_confirmation
+from colab_gemini_utils.src.utils import extract_file_code_pairs, write_file_with_confirmation
 
 def main():
     parser = argparse.ArgumentParser(
@@ -16,7 +16,7 @@ def main():
 
     try:
         with open(args.notebook_path, 'r') as f:
-            notebook_contents = nbformat.read(f, as_version=4)
+            notebook_contents = json.load(f) # Use json.load to read the notebook content
     except FileNotFoundError:
         print(f"Error: Notebook file not found at '{args.notebook_path}'")
         sys.exit(1)
@@ -29,11 +29,16 @@ def main():
 
     for filepath, code in file_code_pairs:
         # compare contents of file currently on disk with new file contents
-        with open(filepath, 'r') as f:
-            original_contents = f.read()
-            # only trigger rewrite if changes have been made
-            if original_contents != code:
-                write_file_with_confirmation(filepath, code)
+        try:
+            with open(filepath, 'r') as f:
+                original_contents = f.read()
+                # only trigger rewrite if changes have been made
+                if original_contents != code:
+                    write_file_with_confirmation(filepath, code)
+        except FileNotFoundError:
+             # If file doesn't exist, just write it
+            write_file_with_confirmation(filepath, code)
+
 
     print("Code extraction and saving process finished.")
 

@@ -1,19 +1,18 @@
 import os
 import re
-import nbformat
 import json
 from pathlib import Path
 
 def create_notebook_from_codebase(codebase_path, output_notebook_path, gemini_prompt_path):
     """
     Convert a Python codebase to a Colab notebook with each file as a separate cell.
-    
+
     Args:
         codebase_path (str): Path to the codebase directory
         output_notebook_path (str): Path where the notebook will be saved
         gemini_prompt_path (str): Path to a markdown file holding the system prompt for gemini
     """
-    
+
     # remove output notebook if it already exists, to prevent recursive listing of a notebook within the notebook of a codebase
     output_notebook_path = Path(output_notebook_path)
     output_notebook_path.unlink(missing_ok=True)
@@ -36,7 +35,7 @@ def create_notebook_from_codebase(codebase_path, output_notebook_path, gemini_pr
         "nbformat": 4,
         "nbformat_minor": 0
     }
-    
+
     # Get all Python files recursively
     codebase_path = Path(codebase_path)
     # note: files here have paths already
@@ -44,7 +43,7 @@ def create_notebook_from_codebase(codebase_path, output_notebook_path, gemini_pr
                           if f.is_file()
                           and not str(f).startswith('.git')
                           and not str(f).startswith('.pytest_cache')]
-    
+
     # remove any files that are irrelevant or sensitive
     with open('colab.ignore', 'r') as f:
         colab_ignore = f.read()
@@ -55,7 +54,7 @@ def create_notebook_from_codebase(codebase_path, output_notebook_path, gemini_pr
 
     # Sort files for consistent ordering
     filtered_filepaths.sort()
-    
+
     # Add Gemini system prompt if given
     if gemini_prompt_path:
         with open(gemini_prompt_path, 'r', encoding='utf-8') as f:
@@ -75,7 +74,7 @@ def create_notebook_from_codebase(codebase_path, output_notebook_path, gemini_pr
             # Read file content
             with open(filepath, 'r', encoding='utf-8') as f:
                 content = f.read()
-            
+
             # Create markdown cell with filename
             markdown_cell = {
                 "cell_type": "markdown",
@@ -84,7 +83,7 @@ def create_notebook_from_codebase(codebase_path, output_notebook_path, gemini_pr
                     f"## 📁 `{filepath}`\n"
                 ]
             }
-            
+
             # Create code cell with file content
             code_cell = {
                 "cell_type": "code",
@@ -93,22 +92,22 @@ def create_notebook_from_codebase(codebase_path, output_notebook_path, gemini_pr
                 "outputs": [],
                 "source": content.splitlines(keepends=True) if content else [""]
             }
-            
+
             # Add cells to notebook
             notebook["cells"].append(markdown_cell)
             notebook["cells"].append(code_cell)
-            
+
         except Exception as e:
             print(f"Error processing {filepath}: {e}")
             continue
-    
+
     # Save notebook
     try:
         with open(output_notebook_path, 'w', encoding='utf-8') as f:
             json.dump(notebook, f, indent=2, ensure_ascii=False)
         print(f"✅ Notebook saved successfully to: {output_notebook_path}")
         print(f"📊 Total cells created: {len(notebook['cells'])}")
-        
+
     except Exception as e:
         print(f"❌ Error saving notebook: {e}")
 
@@ -136,34 +135,37 @@ def write_file(filepath, code):
         f.write(code)
     print(f"Successfully wrote to '{filepath}'.")
 
-def extract_file_code_pairs(notebook_contents:nbformat.NotebookNode):
+def extract_file_code_pairs(notebook_contents: dict):
     """
-    Extracts pairs of filenames and code contents from a notebook
+    Extracts pairs of filenames and code contents from a notebook dictionary.
     Note: it is assumed that the notebook structure alternates between markdown cells with the filename
     and code cells with the code contained in that file
-    
+
     Args:
-        notebook_contents: the contents of a notebook, as read in by nbformat.read()
+        notebook_contents (dict): The contents of a notebook, as loaded from a JSON file.
     """
     file_code_pairs = []
     current_filepath = None
 
-    for cell in notebook_contents.cells:
-        if cell.cell_type == 'markdown':
+    for cell in notebook_contents.get('cells', []):  # Use .get() to safely access 'cells'
+        if cell.get('cell_type') == 'markdown':  # Use .get() to safely access 'cell_type'
             # Look for a markdown cell that seems to contain a file path
-            match = re.search(r'##\s*📁\s*(.*)', cell.source)
+            source = ''.join(cell.get('source', [])) # Use .get() and join list of strings
+            match = re.search(r'##\s*📁\s*(.*)', source)
             if match:
                 current_filepath = match.group(1).strip()
                 current_filepath = re.sub(r'\`', '', current_filepath)
             else:
                 current_filepath = None # Reset if the markdown cell doesn't match the pattern
-        elif cell.cell_type == 'code' and current_filepath:
+        elif cell.get('cell_type') == 'code' and current_filepath: # Use .get() to safely access 'cell_type'
             # If the previous cell was a file path markdown and this is a code cell
-            file_code_pairs.append((current_filepath, cell.source))
+            code_content = ''.join(cell.get('source', [])) # Use .get() and join list of strings
+            file_code_pairs.append((current_filepath, code_content))
             current_filepath = None # Reset after pairing
 
     if not file_code_pairs:
         print("No file path and code pairs found in the notebook.")
-        sys.exit(0)
+        # Decide how to handle this case - maybe return an empty list or raise an error
+        return [] # Returning an empty list for now
     else:
         return file_code_pairs

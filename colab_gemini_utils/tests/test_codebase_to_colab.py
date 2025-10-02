@@ -1,4 +1,3 @@
-import nbformat
 from src.utils import extract_file_code_pairs
 
 def test_extract_file_code_pairs_with_demo_notebook():
@@ -49,9 +48,8 @@ def test_extract_file_code_pairs_with_demo_notebook():
         "nbformat": 4,
         "nbformat_minor": 0
     }
-    notebook_node = nbformat.from_dict(notebook_content)
 
-    extracted_pairs = extract_file_code_pairs(notebook_node)
+    extracted_pairs = extract_file_code_pairs(notebook_content)
 
     # Define the expected output
     expected_pairs = [
