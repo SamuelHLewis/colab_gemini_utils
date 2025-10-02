@@ -50,6 +50,7 @@ python codebase_to_colab.py --codebase_path=./demo --output_notebook=codebase.ip
 ```
 This will generate a notebook called `codebase.ipynb`, which you can then upload to Google Drive and start working in Colab with Gemini.
 **NOTE** if the above command doesn't work, you may have to invoke it with python3 instead:
+
 ```bash
 python3 codebase_to_colab.py --codebase_path=./demo --output_notebook=codebase.ipynb --gemini_prompt_path=./prompts/example_prompt.md
 ```
@@ -57,11 +58,17 @@ python3 codebase_to_colab.py --codebase_path=./demo --output_notebook=codebase.i
 **NOTE:** this script ignores any files that are in the `colab.ignore` file. If you have secrets, API keys, IP addresses etc that you do not want to copy out of your codebase, add them to `colab.ignore` and they will be skipped.
 
 ### Exporting code out of Colab with `colab_to_codebase.py`
-`colab_to_codebase.py` reconstructs your codebase from a colab notebook. It does this by extracting the pairs of markdown cell - code cell from your colab notebook, and writing each to a file, where the file name is what was specified in the markdown cell, and the file contents are what was in the corresponding code cell. You can run the script to reconstruct the demo repo as follows:
+`colab_to_codebase.py` reconstructs your codebase from a colab notebook. It does this by extracting the pairs of markdown cell - code cell from your colab notebook, and writing each to a file, where the file name is what was specified in the markdown cell, and the file contents are what was in the corresponding code cell. It has the following arguments:
+
+`--notebook_path`: Path to the notebook to be converted to a codebase
+
+Once you have imported the demo codebase to a notebook (see above), you can run `colab_to_codebase.py` to export the demo repo back out again as follows:
+
 ```bash
-python ./scripts/colab_to_codebase.py --notebook_path codebase.ipynb
+python ./scripts/colab_to_codebase.py --notebook_path demo.ipynb
 ```
-This will recreate the entire directory from the contents of the colab notebook, asking for confirmation before a pre-existing file is overwritten. Git will pick up any changes, and they can be committed to your repo in the standard way.
+
+This will detect any files that have changes in the colab notebook vs on disk, and ask for confirmation before overwriting them with these changes. You can then use git to track and manage changes in the standard way.
 
 ## Usage Tips
 
