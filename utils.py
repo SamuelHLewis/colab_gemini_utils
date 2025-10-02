@@ -44,9 +44,11 @@ def create_notebook_from_codebase(codebase_path, output_notebook_path, gemini_pr
                           and not str(f).startswith('.git')
                           and not str(f).startswith('.pytest_cache')]
 
-    # remove any files that are irrelevant or sensitive
-    with open('colab.ignore', 'r') as f:
+    # regardless of where the script has been called from, read colab.ignore from the same dir as this script 
+    script_dir = Path(__file__).parent 
+    with open(script_dir / 'colab.ignore', 'r') as f:
         colab_ignore = f.read()
+    # remove any files that are irrelevant or sensitive
     filtered_filepaths = []
     for filepath in codebase_filepaths:
         if filepath.name not in colab_ignore:
