@@ -15,7 +15,7 @@ def main():
     args = parser.parse_args()
 
     try:
-        with open(args.notebook_path, 'r') as f:
+        with open(args.notebook_path, 'r', encoding='utf-8') as f:
             notebook_contents = json.load(f) # Use json.load to read the notebook content
     except FileNotFoundError:
         print(f"Error: Notebook file not found at '{args.notebook_path}'")
@@ -30,7 +30,7 @@ def main():
     for filepath, code in file_code_pairs:
         # compare contents of file currently on disk with new file contents
         try:
-            with open(filepath, 'r') as f:
+            with open(filepath, 'r', encoding='utf-8') as f:
                 original_contents = f.read()
                 # only trigger rewrite if changes have been made
                 if original_contents != code:
@@ -40,7 +40,7 @@ def main():
             write_file_with_confirmation(filepath, code)
 
 
-    print("Code extraction and saving process finished.")
+    print("Codebase reconstructed from colab notebook.")
 
 if __name__ == "__main__":
     main()
