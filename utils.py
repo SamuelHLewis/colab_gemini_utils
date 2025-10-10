@@ -82,7 +82,7 @@ def create_notebook_from_codebase(codebase_path, output_notebook_path, gemini_pr
                 "cell_type": "markdown",
                 "metadata": {},
                 "source": [
-                    f"## 📁 `{filepath}`\n"
+                    f"##`{filepath}`\n"
                 ]
             }
 
@@ -153,7 +153,7 @@ def extract_file_code_pairs(notebook_contents: dict):
         if cell.get('cell_type') == 'markdown':  # Use .get() to safely access 'cell_type'
             # Look for a markdown cell that seems to contain a file path
             source = ''.join(cell.get('source', [])) # Use .get() and join list of strings
-            match = re.search(r'##\s*📁\s*(.*)', source)
+            match = re.search(r'##*(.*)', source)
             if match:
                 current_filepath = match.group(1).strip()
                 current_filepath = re.sub(r'\`', '', current_filepath)
