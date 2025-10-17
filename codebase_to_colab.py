@@ -25,6 +25,13 @@ def main():
         required=False,
         help="Path to a markdown file containing the system prompt for gemini"
     )
+    parser.add_argument(
+        '--ignore',
+        dest='ignore_list',
+        nargs='*',  # Allows zero or more arguments
+        default=[], # Default to an empty list if no arguments are provided
+        help='List of files or directories to ignore (space-separated)'
+    )
     args = parser.parse_args()
 
     # Validate paths
@@ -52,7 +59,8 @@ def main():
         create_notebook_from_codebase(
             codebase_path=str(codebase_path),
             output_notebook_path=str(output_path),
-            gemini_prompt_path=args.gemini_prompt_path
+            gemini_prompt_path=args.gemini_prompt_path,
+            ignore_list=args.ignore_list
         )
     except KeyboardInterrupt:
         print("\n⚠️ Operation cancelled by user")

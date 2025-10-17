@@ -3,7 +3,7 @@ import re
 import json
 from pathlib import Path
 
-def create_notebook_from_codebase(codebase_path, output_notebook_path, gemini_prompt_path):
+def create_notebook_from_codebase(codebase_path, output_notebook_path, gemini_prompt_path, ignore_list=None):
     """
     Convert a Python codebase to a Colab notebook with each file as a separate cell.
 
@@ -11,6 +11,7 @@ def create_notebook_from_codebase(codebase_path, output_notebook_path, gemini_pr
         codebase_path (str): Path to the codebase directory
         output_notebook_path (str): Path where the notebook will be saved
         gemini_prompt_path (str): Path to a markdown file holding the system prompt for gemini
+        ignore_list (list, optional): A list of additional files or directories to ignore. Defaults to None.
     """
 
     # remove output notebook if it already exists, to prevent recursive listing of a notebook within the notebook of a codebase
@@ -44,15 +45,37 @@ def create_notebook_from_codebase(codebase_path, output_notebook_path, gemini_pr
                           and not str(f).startswith('.git')
                           and not str(f).startswith('.pytest_cache')]
 
-    # regardless of where the script has been called from, read colab.ignore from the same dir as this script 
-    script_dir = Path(__file__).parent 
-    with open(script_dir / 'colab.ignore', 'r') as f:
-        colab_ignore = f.read()
+    # regardless of where the script has been called from, read colab.ignore from the same dir as this script
+    script_dir = Path(__file__).parent
+    ignored_items = []
+    try:
+        with open(script_dir / 'colab.ignore', 'r') as f:
+            ignored_items = [line.strip() for line in f if line.strip() and not line.strip().startswith('#')]
+    except FileNotFoundError:
+        print("Warning: 'colab.ignore' file not found.")
+
+    # Add items from ignore_list if provided
+    if ignore_list:
+        ignored_items.extend(ignore_list)
+
+    # Build a set of ignored file paths, including files within ignored directories
+    ignored_files = set()
+    for item in ignored_items:
+        item_path = codebase_path / item
+        if item_path.is_dir():
+            # If it's a directory, add all files within it recursively
+            for f in item_path.rglob('*'):
+                if f.is_file():
+                    ignored_files.add(f)
+        elif item_path.is_file():
+            # If it's a file, add it directly
+            ignored_files.add(item_path)
+        else:
+            print(f"Warning: '{item}' in colab.ignore is not a valid file or directory.")
+
+
     # remove any files that are irrelevant or sensitive
-    filtered_filepaths = []
-    for filepath in codebase_filepaths:
-        if filepath.name not in colab_ignore:
-            filtered_filepaths.append(filepath)
+    filtered_filepaths = [f for f in codebase_filepaths if f not in ignored_files]
 
     # Sort files for consistent ordering
     filtered_filepaths.sort()
